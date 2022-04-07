@@ -28,7 +28,7 @@ class CartController {
         const { productId } = req.params
         const { newQty } = req.body
         try {
-            await database.Carts_Items.update(newQty, {
+            await database.Carts_items.update(newQty, {
                 where: { id: Number(productId) }})
             const productQty = await database.Carts_Items.findOne({
                 where: { id: Number(productId) }})
@@ -41,7 +41,7 @@ class CartController {
     static async deleteItems(req, res) { //delete carts/items
         const { cartId } = req.params
         try {
-            await database.Carts_Items.destroy({
+            await database.Carts_items.destroy({
                 where: { id: Number(cartId) }})
             return res.status(200).json({message: 'O carrinho foi apagado!'})
         } catch (error) {
@@ -49,8 +49,13 @@ class CartController {
         }
     }
 
-    static async orderCart(req, res) {
+    static async orderCart(req, res) { //post checkout
         const { cartId } = req.params
+        try {
+            
+        } catch (error) {
+            return res.status(500).json(error.message)
+        }
     }
 }
 

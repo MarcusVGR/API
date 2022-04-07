@@ -1,4 +1,7 @@
 'use strict';
+
+const { type } = require("express/lib/response");
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Orders', {
