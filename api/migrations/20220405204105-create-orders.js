@@ -15,7 +15,9 @@ module.exports = {
         type: Sequelize.STRING
       },
       cart_id: {
-        type: Sequelize.INTEGER
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: { model: 'Carts', key: 'id' }
       },
       createdAt: {
         allowNull: false,
