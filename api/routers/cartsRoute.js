@@ -7,6 +7,6 @@ router
     .get('/carts/:id', CartController.viewCart) //olha o carrinho
     .put('/carts/:id/carts_items/:productId', CartController.addItem) //adiciona item no carrinho
     .delete('/carts/:id/carts_items', CartController.deleteItems) //deleta carrinho
-    .post('/carts/:id/order', CartController.orderCart) 
+    .post('/carts/:id/order', CartController.orderCart) //atrela o Cart a uma Order
 
 module.exports = router

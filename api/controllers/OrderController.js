@@ -29,7 +29,7 @@ class OrderController {
 
     static async doneOrder(req, res) { //put confirmation
         const { id } = req.params
-        const status = "done"
+        const status = "DONE"
         try {
             await database.Orders.update({
                 where: { 
