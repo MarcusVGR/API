@@ -5,16 +5,8 @@ class CartController {
         const newCart = req.body
 
         try {
-            // newCart.id = Math.random() * 100;
-
-            // const checkCart = await database.Carts.findOne({id: newCart.id});
-            // if(checkCart) {?
-                // gerar um novo id
-            // }
-
             const newCartCreated = await database.Carts.create(newCart)
             return res.status(200).json(newCartCreated)
-
         } catch (error) {
             return res.status(500).json(error.message)
         }
@@ -22,52 +14,56 @@ class CartController {
 
     static async viewCart(req, res){ //get carts
         const { id } = req.params
+
+        if (await database.Carts.findOne({ where: { id: Number(id) }}) !== null) {
+
+        } else {
+            return res.json("Carrinho não encontrado, verifique o id informado.")
+        }
+
         try {
-            const oneCart = await database.Carts.findOne({
-                where: { id: Number(id) }})
+            const oneCart = await database.Carts.findOne({ where: { id: Number(id) }})
             return res.status(200).json(oneCart)
+            
         } catch (error) {
             return res.status(500).json(error.message)
         }
     }
 
-    static async addItem (req, res) { // put carts/items
-
-        const { id, productId } = req.params // supondo que é o id do cart e o id do produto
-        const newQty = req.body // quantidade do produto
+    static async addItem (req, res) { // post carts/items
+        const { cartId, productId } = req.params // id do cart e o id do produto
+        const newQty = req.body.qty // quantidade do produto
         
-        try {
-            // buscar o cart pelo id e ver se existe
-            //if (await database.Carts.findOne({where: { id: Number(id) }}) === {id}) {
-
-                //} else {
-               // return console.log(`O id ${id} não consta na tabela de carrinhos!`)
-            //}
-
-            // com o cart válido, busca o produto pelo productId e verifica se é válido
-            //if(await database.Products.findOne({where: { id: Number(productId) }}) == true) {
-
-               // } else { // se não existir, retornar erro que não existe
-               // return console.log(`O id ${productId} não consta na tabela de produtos!`)
-            //}         
-            //await database.Carts.findOne({ where: { id: Number(id) }})
-            // cria um novo cart item
-            let qty = newQty
-            let cartItem = {
-                cart_id: id,
-                product_id: productId,
-                qty: qty, 
-                price: database.Products.price,
-                total: qty * database.Products.price
-            }
+        if (await database.Carts.findOne({ where: { id: Number(cartId) }}) !== null) {
             
-            const newCartItemCreated = await database.Carts_Items
-                .create(cartItem) //cria o cart_items com a informações
-                .findOne({ where: { id: Number(id) }}) //busca o cart_items 
+        } else {
+            return res.json("Carrinho não encontrado, verifique o id informado.")
+        }
 
-            cart.total += cartItem.total 
-            await database.Carts.update(cart.total, { where: { total: Number(total) }}) //atualiza o total do cart
+        if (await database.Products.findOne({ where: { id: Number(productId) }}) !== null) {
+            
+        } else {
+            return res.json("Produto não encontrado, verifique o id informado.")
+        }
 
+        try {         
+            let product = await database.Products.findOne({ where: { id: Number(productId) }})
+            let cart = await database.Carts.findOne({ where: { id: Number(cartId) }}) //busca o cart
+
+            let total = newQty * product.price
+            
+            let cartItem = {
+                cart_id: cartId,
+                product_id: productId,
+                qty: newQty, 
+                price: product.price,
+                total: total
+            }
+            const newCartItemCreated = await database.Carts_items.create(cartItem) //cria o cart_items com a informações 
+
+            let cart_total = cart.total + cartItem.total
+    
+            await database.Carts.update({total: cart_total}, { where: { id: Number(cartId) }}) //atualiza o total do cart
             return res.status(200).json(newCartItemCreated) // mostra o cart_items criado
         } catch (error) {
             return res.status(500).json(error.message)
@@ -76,10 +72,17 @@ class CartController {
 
     static async deleteItems(req, res) { //delete carts/items
         const { cartId } = req.params
+
+        if (await database.Carts.findOne({ where: { id: Number(cartId) }}) !== null) {
+            
+        } else {
+            return res.json("Carrinho não encontrado, verifique o id informado.")
+        }
+
         try {
-            await database.Carts_items.destroy({
-                where: { id: Number(cartId) }})
-            return res.status(200).json({message: 'O carrinho foi apagado!'})
+            await database.Carts_items.destroy({ where: { cart_id: Number(cartId) }}) //zera o Cart_items
+            await database.Carts.update({total: 0}, { where: { id: Number(cartId) }}) //zera o carrinho
+            return res.status(200).json("O carrinho foi apagado!")
         } catch (error) {
             return res.status(500).json(error.message)
         }
@@ -87,21 +90,19 @@ class CartController {
 
     static async orderCart(req, res) { //post checkout
         const { cartId } = req.params
-        try {
-        //     if (await database.Carts.findOne({where: { id: Number(cartId) }}) != false) {
-
-        //     } else {
-        //     return console.log(`O id ${id} não consta na tabela de carrinhos!`)
-        // }
-        // nova Order    
-        let newOrder = {
-            status: 'PENDING',
-            cart_id: cartId
+        
+        if (await database.Carts.findOne({ where: { id: Number(cartId) }}) !== null) {
+            
+        } else {
+            return res.json("Carrinho não encontrado, verifique o id informado.")
         }
         
-        const newOrderCreated = await database.Orders
-                .create(newOrder)
-                .findOne({ where: { id: Number(cartId) }})
+        try {  
+            let newOrder = {
+                status: 'PENDING',
+                cart_id: cartId
+            }
+        const newOrderCreated = await database.Orders.create(newOrder)
         
         return res.status(200).json(newOrderCreated)
         } catch (error) {

@@ -13,6 +13,7 @@ class ProductController {
 
     static async createProduct(req, res) { //post produtcs
         const newProduct = req.body 
+
         try{
             const newProductCreate = await database.Products.create(newProduct)
             return res.status(200).json(newProductCreate)
@@ -25,11 +26,17 @@ class ProductController {
     static async editProduct(req, res) { //put produtcs
         const { id } = req.params
         const newData = req.body
+
+        if (await database.Products.findOne({ where: { id: Number(id) }}) !== null) {
+            
+        } else {
+            return res.json("Produto não encontrado, verifique o id informado.")
+        }
+
         try {
-            await database.Products.update(newData, {
-                where: { id: Number(id) }})
-            const attProdutc = await database.Products.findOne({
-                where: { id: Number(id) }})
+            await database.Products.update(newData, { where: { id: Number(id) }})
+            
+            const attProdutc = await database.Products.findOne({ where: { id: Number(id) }})
             return res.status(200).json(attProdutc)
         } catch (error) {
             return res.status(500).json(error.message)

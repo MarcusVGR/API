@@ -5,6 +5,6 @@ const router = Router()
 router
     .get('/orders/:id', OrderController.viewOrder)
     .put('/orders/:id', OrderController.editOrder)
-    .put('/products/:id', OrderController.doneOrder)
+    .post('/orders/:id/confirmation', OrderController.doneOrder)
 
 module.exports = router
